@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+
+<head>
+	<meta charset="UTF-8">
+	<title>index Page</title>
+
+	<style>
+		/* CSS to hide the table by default */
+		#customerList {
+			display: none;
+		}
+
+
+		/* Style for the popup form */
+		.popup-form {
+			display: none;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background-color: #fff;
+			padding: 20px;
+			border: 1px solid #ccc;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+			z-index: 1000;
+		}
+
+
+		table,
+		th,
+		td {
+			border: 1px solid black;
+			border-collapse: collapse;
+		}
+	</style>
+
+</head>
+
+<body onload="onLoadFunction()">
+	<section>
+
+
+
+
+
+		<div id="startDiv">
+
+		</div>
+		<div class="container p-3">
+			<div class="row">
+				<div class="col-md-6 offset-md-3">
+					<!--	<div class="card" style="width: fit-content;"> -->
+					<div id="customerList" style="display: none; width:fit-content">
+					</div>
+
+					<form id="popup-form"  class="popup-form"  method="post" style="display: none;">
+						<div class=mb-3>
+							<label> Enter Full Name</label>
+							<input type="text" name="fullName" class="form-control" id="fullName">
+						</div>
+
+						<div class=mb-3>
+							<label> Address</label>
+							<input type="text" name="address" class="form-control" id="address">
+						</div>
+
+						<div class=mb-3>
+							<label> Email</label>
+							<input type="text" name="email" class="form-control" id="email">
+						</div>
+
+						<div class="mb-3">
+							<select class="form-select" name="accountType" required id="accountType">
+								<option value="">Select Account Type</option>
+								<option value="savings">Savings Account</option>
+								<option value="checking">Checking Account</option>
+							</select>
+						</div>
+
+						<div class="mb-3">
+							<label> Initial Balance</label>
+							<input type="text" class="form-control" name="initialBalance" placeholder="Initial Balance"
+								required id="initialBalance">
+						</div>
+						<div class="mb-3">
+							<label> ID Proof</label>
+							<input type="text" class="form-control" name="idProof" placeholder="ID Proof" required
+								id="idProof">
+						</div>
+						<div class=mb-3>
+							<label> Mobile Number</label>
+							<input type="text" name="mobileNo" class="form-control" id="mobileNo">
+						</div>
+						<div class="mb-3">
+							<label> DOB</label>
+							<input type="date" class="form-control" name="dOB" placeholder="Date of Birth" required
+								id="dOB">
+						</div>
+
+						<div class="text-center">
+							<button type="submit" class="btn btn-primary" id="registerButton">Register</button>
+						</div>
+					</form>
+
+					<div id="welcomeDiv">
+						<h1>Welcome to Bank Management APP</h1>
+					</div>
+
+					<div id="NoCustomerDiv" style="display: none; width:fit-content">
+						<h1>No customer in the system</h1>
+					</div>
+					<!--	</div>  -->
+				</div>
+			</div>
+			<script>
+
+				function fetchData(id) {
+					var path = "http://localhost:8081/customer-details/" + id;
+					fetch(path, {
+						method: "GET"
+					})
+						.then(function (response) {
+							if (!response.ok) {
+								// Request failed, handle the error here
+								throw new Error("Request failed with status: " + response.status);
+							}
+							// Parse the response as JSON
+							return response.json();
+						})
+						.then(function (responseData) {
+
+							var NoCustomerDiv = document.getElementById("popup-form");
+								NoCustomerDiv.style.display = "block";
+								
+								
+								
+						})
+						.catch(function (error) {
+							// Handle any errors that occurred during the fetch
+							console.error(error);
+						});
+				}
+
+				/*			openPopupButtons.forEach(function (button) {
+								button.addEventListener("click", function () {
+									var rowId = button.getAttribute("data-row-id");
+									var row = button.closest("tr"); // Get the closest table row
+									var name = row.cells[0].textContent; // Get the text content of the first cell (Name)
+									var email = row.cells[1].textContent; // Get the text content of the second cell (Email)
+									nameInput.value = name;
+									emailInput.value = email;
+									popupForm.style.display = "block";
+								});
+							}); */
+
+
+
+				// Function to handle the login form submission
+				function handleLogin() {
+					// Make a POST request using the fetch API
+					fetch("http://localhost:8081/customer-details", {
+						method: "GET"
+					})
+						.then(function (response) {
+							if (!response.ok) {
+								// Request failed, handle the error here
+								throw new Error("Request failed with status: " + response.status);
+							}
+							// Parse the response as JSON
+
+
+
+							return response.json();
+						})
+						.then(function (responseData) {
+							// Request was successful, process the response here
+							if (responseData != null && responseData.length > 0) {
+
+								var NoCustomerDiv = document.getElementById("NoCustomerDiv");
+								NoCustomerDiv.style.display = "none";
+								showAdminItemAfterLogin();
+
+								var tableContainer = document.getElementById("customerList");
+								let table = document.createElement("table");
+								let cols = Object.keys(responseData[0]);
+								let thead = document.createElement("thead");
+								let tr = document.createElement("tr");
+								tr.style.borderWidth = "2";
+								cols.forEach((item) => {
+									let th = document.createElement("th");
+									th.style.borderWidth = "2";
+									th.innerText = item; // Set the column name as the text of the header cell
+									tr.appendChild(th); // Append the header cell to the header row
+								});
+								let actioncolHeader = document.createElement("th");
+								actioncolHeader.style.borderWidth = "2";
+								actioncolHeader.innerText = "action"; // Set the column name as the text of the header cell
+								tr.appendChild(actioncolHeader); // Append the header cell to the header row
+
+
+
+								thead.appendChild(tr); // Append the header row to the header
+								table.append(tr)
+
+								let i = 1;
+								responseData.forEach((item) => {
+									let tr = document.createElement("tr");
+									tr.style.borderWidth = "2";
+									// Get the values of the current object in the JSON data
+									let vals = Object.values(item);
+
+									// Loop through the values and create table cells
+									vals.forEach((elem) => {
+										let td = document.createElement("td");
+										td.style.borderWidth = "2";
+										td.innerText = elem; // Set the value as the text of the table cell
+										tr.appendChild(td); // Append the table cell to the table row
+									});
+
+									let td = document.createElement("td");
+									td.style.borderWidth = "5";
+									td.innerHTML = "<button onclick='fetchData(" + vals[0] + ")' >open</button>"; // Set the value as the text of the table cell
+									tr.appendChild(td);
+									i++;
+
+									table.appendChild(tr); // Append the table row to the table
+								});
+								tableContainer.appendChild(table)
+							}
+							else {
+								var NoCustomerDiv = document.getElementById("NoCustomerDiv");
+								NoCustomerDiv.style.display = "block";
+
+								var regNav = document.getElementById("register-nav");
+								regNav.style.display = "block";
+
+							}
+
+							console.log(responseData);
+						})
+						.catch(function (error) {
+							// Handle any errors that occurred during the fetch
+							console.error(error);
+						});
+				}
+
+				// Add an event listener to the login button
+
+
+
+				function showAdminItemAfterLogin() {
+					//	var loginPage = document.getElementById("loginpage");
+					//	loginPage.style.display = "none";  
+					var regNav = document.getElementById("register-nav");
+					regNav.style.display = "block";
+
+					var tableContainer = document.getElementById("customerList");
+					tableContainer.style.display = "block";
+
+				}
+
+
+				function onLoadFunction() {
+					let isLogin = sessionStorage.getItem("isLogin");
+					if (isLogin == "true") {
+						var welDiv = document.getElementById("welcomeDiv");
+						welDiv.style.display = "none";
+						handleLogin();
+					}
+					else {
+						var welDiv = document.getElementById("welcomeDiv");
+						welDiv.style.display = "block";
+
+						var regNav = document.getElementById("register-nav");
+						regNav.style.display = "none";
+
+						var tableContainer = document.getElementById("customerList");
+						tableContainer.style.display = "none";
+
+						var NoCustomerDiv = document.getElementById("NoCustomerDiv");
+						NoCustomerDiv.style.display = "none";
+					}
+
+				}
+			</script>
+
+	</section>
+</body>
+
+</html>

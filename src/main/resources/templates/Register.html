@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base::layout(~{::section})}
+">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Registration Page</title>
+
+</head>
+
+<body>
+
+	<section>
+		<div class="container p-3">
+			<div class="row">
+				<div class="col-md-6 offset-md-3">
+					<div class="card">
+
+						<div class="card-header text-center fs-4">Register Page</div>
+						<div class="card-body">
+							<form action="createUser" method="post">
+								<div class=mb-3>
+									<label> Enter Full Name</label>
+									<input type="text" name="fullName" class="form-control" id="fullName">
+								</div>
+
+								<div class=mb-3>
+									<label> Address</label>
+									<input type="text" name="address" class="form-control" id="address">
+								</div>
+
+								<div class=mb-3>
+									<label> Email</label>
+									<input type="text" name="email" class="form-control" id="email">
+								</div>
+
+								<div class="mb-3">
+									<select class="form-select" name="accountType" required id="accountType">
+										<option value="">Select Account Type</option>
+										<option value="savings">Savings Account</option>
+										<option value="checking">Checking Account</option>
+									</select>
+								</div>
+
+								<div class="mb-3">
+									<label> Initial Balance</label>
+									<input type="text" class="form-control" name="initialBalance"
+										placeholder="Initial Balance" required id="initialBalance">
+								</div>
+								<div class="mb-3">
+									<label> ID Proof</label>
+									<input type="text" class="form-control" name="idProof" placeholder="ID Proof"
+										required id="idProof">
+								</div>
+								<div class=mb-3>
+									<label> Mobile Number</label>
+									<input type="text" name="mobileNo" class="form-control" id="mobileNo">
+								</div>
+								<div class="mb-3">
+									<label> DOB</label>
+									<input type="date" class="form-control" name="dOB" placeholder="Date of Birth"
+										required id="dOB">
+								</div>
+
+								<div class="text-center">
+									<button type="submit" class="btn btn-primary" id="registerButton">Register</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<script>
+				function handleRegister(event) {
+					event.preventDefault(); // Prevent the default form submission
+					var fullName = document.getElementById("fullName").value;
+					var address = document.getElementById("address").value;
+					var accountType = document.getElementById("accountType").value;
+					var initialBalance = document.getElementById("initialBalance").value;
+					var idProof = document.getElementById("idProof").value;
+					var mobileNo = document.getElementById("mobileNo").value;
+					var dOB = document.getElementById("dOB").value;
+					var email = document.getElementById("email").value;
+					// Create an object with data to send in the request body
+					var data = {
+						fullName: fullName,
+						address: address,
+						accountType: accountType,
+						initialBalance: initialBalance,
+						idProof: idProof,
+						mobileNo: mobileNo,
+						dob: dOB,
+						email:email
+					};
+					// Make a POST request using the fetch API
+					fetch("http://localhost:8081/customer-details", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify(data)
+					})
+						.then(function (response) {
+							if (!response.ok) {
+								// Request failed, handle the error here
+								throw new Error("Request failed with status: " + response.status);
+							}
+							// Parse the response as JSON
+							return response.json();
+						})
+						.then(function (responseData) {
+							// Request was successful, process the response here
+							if (responseData != null && responseData.success) {
+								sessionStorage.setItem("isLogin", "true");
+								var loginPage = document.getElementById("loginpage");
+								loginPage.style.display = "none";
+								var logoutPage = document.getElementById("logoutDiv");
+								logoutPage.style.display = "block";
+							}
+							else {
+								alert("username or password is incorrect please re-enter");
+							}
+
+							console.log(responseData);
+						})
+						.catch(function (error) {
+							// Handle any errors that occurred during the fetch
+							console.error(error);
+						});
+				}
+
+
+
+				var registerButton = document.getElementById("registerButton");
+				registerButton.addEventListener("click", handleRegister);
+				function onLoadFunction() { }
+			</script>
+	</section>
+
+
+</body>
+
+</html>
